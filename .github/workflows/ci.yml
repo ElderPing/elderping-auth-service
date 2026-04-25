@@ -1,0 +1,78 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - develop
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  # Pull Request Jobs
+  sast:
+    if: github.event_name == 'pull_request'
+    uses: ElderPing/elderping-shared/.github/workflows/_sast.yml@v1.0.0
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_URL: ${{ secrets.SONAR_URL }}
+
+  sca:
+    if: github.event_name == 'pull_request'
+    needs: sast
+    uses: ElderPing/elderping-shared/.github/workflows/_sca.yml@v1.0.0
+    with:
+      service-name: elderpinq-auth-service
+      service-path: .
+      runtime: node
+    secrets:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  notify-snyk:
+    if: github.event_name == 'pull_request' && needs.sca.outputs.critical-found == 'true'
+    needs: sca
+    uses: ElderPing/elderping-shared/.github/workflows/_notify.yml@v1.0.0
+    with:
+      subject: "Snyk Critical Vulnerabilities Found - {service-name}"
+      body: "Critical or high vulnerabilities were found in {service-name}. Please review the attached report."
+      service-name: elderpinq-auth-service
+      artifact-name: snyk-report-elderpinq-auth-service
+    secrets:
+      BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+
+  build:
+    if: github.event_name == 'pull_request'
+    needs: [sast, sca]
+    uses: ElderPing/elderping-shared/.github/workflows/_docker-build.yml@v1.0.0
+    with:
+      service-name: elderpinq-auth-service
+      service-path: .
+
+  notify-trivy:
+    if: github.event_name == 'pull_request' && needs.build.outputs.trivy-critical == 'true'
+    needs: build
+    uses: ElderPing/elderping-shared/.github/workflows/_notify.yml@v1.0.0
+    with:
+      subject: "Trivy Critical Vulnerabilities Found - {service-name}"
+      body: "Critical or high vulnerabilities were found in the Docker image for {service-name}. Please review the attached report."
+      service-name: elderpinq-auth-service
+      artifact-name: trivy-{service-name}
+    secrets:
+      BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+
+  # Push Jobs
+  publish:
+    if: github.event_name == 'push'
+    uses: ElderPing/elderping-shared/.github/workflows/_docker-publish.yml@v1.0.0
+    with:
+      service-name: elderpinq-auth-service
+      service-path: .
+      environment: ${{ github.ref_name }}
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

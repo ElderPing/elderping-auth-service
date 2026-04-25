@@ -34,7 +34,7 @@ jobs:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   notify-snyk:
-    if: github.event_name == 'pull_request' && needs.sca.outputs.critical-found == 'true'
+    if: always() && github.event_name == 'pull_request' && needs.sca.outputs.critical-found == 'true'
     needs: sca
     uses: ElderPing/elderping-shared/.github/workflows/_notify.yml@v1.0.0
     with:
@@ -54,7 +54,7 @@ jobs:
       service-path: .
 
   notify-trivy:
-    if: github.event_name == 'pull_request' && needs.build.outputs.trivy-critical == 'true'
+    if: always() && github.event_name == 'pull_request' && needs.build.outputs.trivy-critical == 'true'
     needs: build
     uses: ElderPing/elderping-shared/.github/workflows/_notify.yml@v1.0.0
     with:

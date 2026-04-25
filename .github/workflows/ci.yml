@@ -38,8 +38,8 @@ jobs:
     needs: sca
     uses: ElderPing/elderping-shared/.github/workflows/_notify.yml@v1.0.0
     with:
-      subject: "Snyk Critical Vulnerabilities Found - {service-name}"
-      body: "Critical or high vulnerabilities were found in {service-name}. Please review the attached report."
+      subject: "Snyk Critical Vulnerabilities Found - elderpinq-auth-service"
+      body: "Critical or high vulnerabilities were found in elderpinq-auth-service. Please review the attached report."
       service-name: elderpinq-auth-service
       artifact-name: snyk-report-elderpinq-auth-service
     secrets:
@@ -58,10 +58,10 @@ jobs:
     needs: build
     uses: ElderPing/elderping-shared/.github/workflows/_notify.yml@v1.0.0
     with:
-      subject: "Trivy Critical Vulnerabilities Found - {service-name}"
-      body: "Critical or high vulnerabilities were found in the Docker image for {service-name}. Please review the attached report."
+      subject: "Trivy Critical Vulnerabilities Found - elderpinq-auth-service"
+      body: "Critical or high vulnerabilities were found in the Docker image for elderpinq-auth-service. Please review the attached report."
       service-name: elderpinq-auth-service
-      artifact-name: trivy-{service-name}
+      artifact-name: trivy-elderpinq-auth-service
     secrets:
       BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
 

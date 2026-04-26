@@ -46,7 +46,7 @@ jobs:
     with:
       service-name: auth-service
       service-path: .
-      runtime: python
+      runtime: node
     secrets:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 

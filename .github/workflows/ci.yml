@@ -17,7 +17,7 @@ jobs:
   # Pull Request Jobs
   sast:
     if: github.event_name == 'pull_request'
-    uses: ElderPing/elderping-shared/.github/workflows/_sast.yml@v1.0.0
+    uses: ElderPing/elderping-shared/.github/workflows/_sast.yml@main
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_URL: ${{ secrets.SONAR_URL }}
@@ -25,7 +25,7 @@ jobs:
   sca:
     if: github.event_name == 'pull_request'
     needs: sast
-    uses: ElderPing/elderping-shared/.github/workflows/_sca.yml@v1.0.0
+    uses: ElderPing/elderping-shared/.github/workflows/_sca.yml@main
     with:
       service-name: elderpinq-auth-service
       service-path: .
@@ -36,7 +36,7 @@ jobs:
   notify-snyk:
     if: always() && github.event_name == 'pull_request' && needs.sca.outputs.critical-found == 'true'
     needs: sca
-    uses: ElderPing/elderping-shared/.github/workflows/_notify.yml@v1.0.0
+    uses: ElderPing/elderping-shared/.github/workflows/_notify.yml@main
     with:
       subject: "Snyk Critical Vulnerabilities Found - elderpinq-auth-service"
       body: "Critical or high vulnerabilities were found in elderpinq-auth-service. Please review the attached report."
@@ -48,7 +48,7 @@ jobs:
   build:
     if: github.event_name == 'pull_request'
     needs: [sast, sca]
-    uses: ElderPing/elderping-shared/.github/workflows/_docker-build.yml@v1.0.0
+    uses: ElderPing/elderping-shared/.github/workflows/_docker-build.yml@main
     with:
       service-name: elderpinq-auth-service
       service-path: .
@@ -56,7 +56,7 @@ jobs:
   notify-trivy:
     if: always() && github.event_name == 'pull_request' && needs.build.outputs.trivy-critical == 'true'
     needs: build
-    uses: ElderPing/elderping-shared/.github/workflows/_notify.yml@v1.0.0
+    uses: ElderPing/elderping-shared/.github/workflows/_notify.yml@main
     with:
       subject: "Trivy Critical Vulnerabilities Found - elderpinq-auth-service"
       body: "Critical or high vulnerabilities were found in the Docker image for elderpinq-auth-service. Please review the attached report."
@@ -68,7 +68,7 @@ jobs:
   # Push Jobs
   publish:
     if: github.event_name == 'push'
-    uses: ElderPing/elderping-shared/.github/workflows/_docker-publish.yml@v1.0.0
+    uses: ElderPing/elderping-shared/.github/workflows/_docker-publish.yml@main
     with:
       service-name: elderpinq-auth-service
       service-path: .
